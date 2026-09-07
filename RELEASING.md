@@ -70,8 +70,8 @@ is interrupted, rerun the same installer; if a release needs rollback, run the
 previous installer. Neither procedure removes library artwork or saved state.
 
 The native runtime requires Python 3.9 or newer; actual MiSTer checks use 3.9.6.
-The portable CLI has local macOS evidence. Hosted Linux/macOS CI remains pending
-until a source repository exists. The 0.1.3-dev controller and display sample checks are recorded in
+The portable CLI has local macOS evidence. The Checks workflow verifies Linux/macOS on each pull request; require
+green checks on the exact release revision. The 0.1.3-dev controller and display sample checks are recorded in
 [Compatibility](COMPATIBILITY.md).
 
 Native MediaPrep optimization is deferred and is not a release gate. The
