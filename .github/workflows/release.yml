@@ -1,0 +1,118 @@
+name: Version tag and release
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing immutable tag to recover; never creates or moves a tag
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: mediaprep-release
+  cancel-in-progress: false
+jobs:
+  checks:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    uses: ./.github/workflows/checks.yml
+    with:
+      ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.sha }}
+  tag:
+    needs: checks
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.bump.outputs.new_version }}
+      skipped: ${{ steps.bump.outputs.skipped }}
+      publish: ${{ steps.bump.outputs.should_release }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.9'
+      - name: Validate explicit request and staged version
+        id: plan
+        run: python -B release.py
+      - name: Build and verify assets before tagging
+        if: steps.plan.outputs.requested == 'true'
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: python -B build.py --release-dir dist --tag "$TAG"
+      - name: Create immutable version tag
+        id: bump
+        if: steps.plan.outputs.requested == 'true'
+        uses: so1omon563/custom-semver-bumper@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: none
+          marker_style: hashtag
+          release_marker: '#release'
+          move_major_tag: 'false'
+          move_minor_tag: 'false'
+      - name: Verify action outputs and exact tag
+        if: steps.plan.outputs.requested == 'true'
+        env:
+          TAG: ${{ steps.bump.outputs.new_version }}
+          EXPECTED: ${{ steps.plan.outputs.tag }}
+          PUBLISH: ${{ steps.bump.outputs.should_release }}
+          EXPECTED_PUBLISH: ${{ steps.plan.outputs.publish }}
+        run: |
+          test "$TAG" = "$EXPECTED"
+          test "$PUBLISH" = "$EXPECTED_PUBLISH"
+          python -B release.py --tag "$TAG"
+  release:
+    needs: [checks, tag]
+    if: >-
+      always() && needs.checks.result == 'success' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (needs.tag.result == 'success' && needs.tag.outputs.skipped == 'false' && needs.tag.outputs.publish == 'true'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: refs/tags/${{ inputs.tag || needs.tag.outputs.tag }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.9'
+      - name: Verify existing tag, test and build exact release source
+        env:
+          TAG: ${{ inputs.tag || needs.tag.outputs.tag }}
+        run: |
+          python -B release.py --tag "$TAG"
+          python -B -m unittest -q
+          python -B build.py --release-dir dist --tag "$TAG"
+      - name: Publish verified assets
+        uses: so1omon563/release-creator@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ inputs.tag || needs.tag.outputs.tag }}
+          tag-prefix: v
+          notes-format: grouped
+          skip-if-release-exists: 'true'
+          move-major-tag: 'false'
+          move-minor-tag: 'false'
+          asset-paths: |
+            dist/mister-mediaprep.pyz
+            dist/mister-mediaprep.sh
+            dist/mister-mediaprep-install.sh
+            dist/SHA256SUMS
+      - name: Verify published assets, including recovery runs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || needs.tag.outputs.tag }}
+        run: |
+          downloaded=$(mktemp -d)
+          for asset in mister-mediaprep.pyz mister-mediaprep.sh mister-mediaprep-install.sh SHA256SUMS; do
+            gh release download "$TAG" --pattern "$asset" --dir "$downloaded"
+            cmp "dist/$asset" "$downloaded/$asset"
+          done
