@@ -13,7 +13,7 @@ import unicodedata
 import xml.etree.ElementTree as ET
 
 
-VERSION = "0.1.3-dev"
+VERSION = "0.1.0"
 
 ARTWORK_SOURCES = {"box": {"boxart2d": "2D box art", "boxart3d": "3D box art"},
                    "background": {"screenshot": "Screenshot", "titlescreen": "Title screen"}}
