@@ -9,6 +9,9 @@ RELEASING.md
 build.py
 corrections.py
 deployment.py
+docs/CLI.md
+docs/RECOVERY.md
+docs/USAGE.md
 install.py
 journal.py
 mister-mediaprep

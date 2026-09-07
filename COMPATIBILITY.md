@@ -38,11 +38,17 @@ No approximate game matching is performed.
 
 ## Verification evidence
 
-The 0.1.3-dev runtime has passed the focused suite on native MiSTer Python 3.9.6
-and macOS. Linux permits the case-sensitive fixture that macOS skips. Packaging
-checks exercise deterministic builds, embedded installation, CLI execution and
-preservation of existing application state. Hosted CI is a separate release
-check; local results do not establish that it has run.
+Public v0.1.0 contains the same runtime feature code that was exercised on the
+device under the historical development identifier 0.1.3-dev; the public build
+replaced that internal version string with 0.1.0. The exact published release
+assets passed an isolated clean installation and first scan on native MiSTer
+Python 3.9.6. Their checksums and bytes were compared with the reviewed release
+build after download.
+
+The v0.1.0 source passed hosted Linux and macOS checks on Python 3.9 and 3.14.
+Packaging checks exercise deterministic builds, embedded installation, CLI
+execution, and preservation of existing application state. Linux also exercises
+the case-sensitive fixture that macOS skips.
 
 Device artwork and launch spot checks cover PSX, Saturn, NES (including FDS),
 SNES, MegaDrive, MegaCD, Neo Geo, Atari 2600/5200/7800, Jaguar, N64, Neo Geo CD,
@@ -50,11 +56,13 @@ SNES, MegaDrive, MegaCD, Neo Geo, Atari 2600/5200/7800, Jaguar, N64, Neo Geo CD,
 Atari Lynx, Vectrex and Arcade root/alternate entries. These demonstrate common
 layout compatibility, not exhaustive testing of every title or available core.
 
-The installed 0.1.3-dev controller checks verified navigation, health reporting,
+Historical device checks performed before the public version was assigned used
+the 0.1.3-dev label. They verified controller navigation, health reporting,
 source preference persistence and fallback, Fill missing preservation, Arcade
-Apply, saved corrections and a selected Replace run resumed after a controlled
+Apply, saved corrections, and a selected Replace run resumed after a controlled
 stop before writes. Automated native tests separately exercise partial-write
-failures. File hashes and user display/launch observations are distinct evidence.
+failures. File hashes and user display/launch observations remain distinct
+evidence.
 
 ## Preservation and recovery limits
 

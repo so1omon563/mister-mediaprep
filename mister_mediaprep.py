@@ -676,7 +676,7 @@ def scan(args):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(prog="mister-mediaprep", description="Prepare your artwork for MiSTer Console Mode.")
+    parser = argparse.ArgumentParser(prog="mister-mediaprep", description="Prepare existing artwork for MiSTer Console Mode.")
     parser.add_argument("--version", action="version", version="MiSTer MediaPrep " + VERSION)
     sub = parser.add_subparsers(dest="command", required=True)
     correction = sub.add_parser("correction", help="Save current or chosen game artwork across future scrapes")

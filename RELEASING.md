@@ -70,9 +70,10 @@ is interrupted, rerun the same installer; if a release needs rollback, run the
 previous installer. Neither procedure removes library artwork or saved state.
 
 The native runtime requires Python 3.9 or newer; actual MiSTer checks use 3.9.6.
-The portable CLI has local macOS evidence. The Checks workflow verifies Linux/macOS on each pull request; require
-green checks on the exact release revision. The 0.1.3-dev controller and display sample checks are recorded in
-[Compatibility](COMPATIBILITY.md).
+The Checks workflow verifies Linux/macOS on each pull request. Require green
+checks on the exact release revision. Historical device checks used the internal
+0.1.3-dev label; [Compatibility](COMPATIBILITY.md) explains how that evidence
+relates to public v0.1.0.
 
 Native MediaPrep optimization is deferred and is not a release gate. The
 supported workflow prepares raw artwork without image dependencies, then leaves
@@ -81,11 +82,11 @@ normal targeted stale-cache invalidation during artwork updates.
 
 ## Public source contents
 
-`PUBLIC_FILES.txt` is the reviewed initial publication file list. Copy only those
-files into the proposed repository; it includes runtime source, synthetic tests,
-user/maintainer documentation, MIT licensing and the two workflows. Review any
-addition before publishing. Historical investigations, private plans, generated
-assets and device receipts are excluded and may be retained separately.
+`PUBLIC_FILES.txt` records the files intended for the public repository. Update
+it when adding public runtime source, synthetic tests, user/maintainer
+documentation, licensing, or workflows. Review additions before publishing.
+Historical investigations, private plans, generated assets, and device receipts
+remain excluded.
 
 The runtime bundles only this project's Python modules and MIT license. It does
 not vendor image libraries, games or scraped artwork. Keep device-specific paths,
